@@ -33,7 +33,7 @@ client.on("messageCreate", message => {
   
   if(commands[0] === "give")
   {
-    if (!message.member.roles.cache.some(role => role.name === 'Lead')) 
+    if (!message.member.roles.cache.some(role => role.name === 'LEAD')) 
     {
       message.reply("Command reserved for Leadership roles");
       return;
