@@ -33,28 +33,30 @@ client.on("messageCreate", message => {
   
   if(commands[0] === "give")
   {
-    if (!message.member.roles.cache.some(role => role.name === 'Leader')) 
+    if (!message.member.roles.cache.some(role => role.name === 'Lead')) 
     {
       message.reply("Command reserved for Leadership roles");
       return;
     }
     userId = processUserId(commands[1]);
-    if(userId === commands[1]) message.reply("Invalid command!. `proto give <user> <points>`");
+    if(userId === commands[1]) message.reply("Invalid user !");
     else if(isValidGuildMember(message.guild, userId))
     {
       if(!isNaN(commands[2]))
       {
         givePoints(userId, commands[2],message ,pool);
+        message.reply(`<@${userId}> is given ${commands[2]}`)
         
       }
-      else message.reply("Invalid command!. `proto give <user> <points>`");
+      else message.reply("Invalid command!. points should be a number!`");
     }
-    else message.reply("Invalid command!. `proto give <user> <points>`");
+    else message.reply("Invalid command!. try `proto points`");
   }
   else if(commands[0] === "points" )
   {
-    if(!commands[1]) return;
-    userId = processUserId(commands[1]);
+    if(commands[1] === undefined) userId = message.author.id;
+    else userId = processUserId(commands[1]);
+
     if(isValidGuildMember(message.guild, userId))
     {
       getPointsByUserId(userId)
@@ -63,6 +65,7 @@ client.on("messageCreate", message => {
         ))
         .catch(console.log);
     }
+    else message.reply("Invalid userid entered!")
   }
   else if(commands[0] === "top" )
   {
@@ -80,7 +83,7 @@ client.login(token);
 
 function processUserId(userId)
 {
-  if (!userId) return 0;
+  if (userId === undefined) return undefined;
 	if (userId.startsWith('<@') && userId.endsWith('>')) {
 		userId = userId.slice(2, -1);
 
@@ -145,7 +148,6 @@ async function getPointsByUserId(userId)
   `
     SELECT * FROM members WHERE userid = '${userId}';
   `);
-  console.log(res);
   return res;
 }
 
@@ -159,10 +161,11 @@ async function initialise(message, pool)
       members.forEach(member=> {
         if(!member.user.bot) querystring += `(${member.user.id},0,'${member.user.username}','${member.user.avatarURL()}'),`
       })
-      querystring = querystring.substring(0, querystring.length - 1)
+      querystring = querystring.substring(0, querystring.length - 1) // for removing trailing comma of last entry
       querystring += ` ON CONFLICT (userId) DO NOTHING;`
       console.log(querystring);
       pool.query(querystring);
   })
   
 }
+
