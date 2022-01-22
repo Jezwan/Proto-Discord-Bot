@@ -75,7 +75,7 @@ client.on("messageCreate", message => {
   {
     initialise(message, pool).catch(console.log);
   }
-  else message.reply("Invalid command!. `proto give <user> <points>`");
+  else message.reply("Invalid command!. `proto points @user`");
 
 });
 
