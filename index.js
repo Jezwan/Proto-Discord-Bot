@@ -59,7 +59,7 @@ client.on("messageCreate", message => {
 
     if(isValidGuildMember(message.guild, userId))
     {
-      getPointsByUserId(userId).catch(console.log);
+      getPointsByUserId(userId, message, pool).catch(console.log);
     }
     else message.reply("Invalid userid entered!")
   }
@@ -160,7 +160,7 @@ async function getTopRank(message,pool){
 
 }
 
-async function getPointsByUserId(userId, message)
+async function getPointsByUserId(userId, message, pool)
 {
 
   pool
