@@ -59,11 +59,7 @@ client.on("messageCreate", message => {
 
     if(isValidGuildMember(message.guild, userId))
     {
-      getPointsByUserId(userId)
-      .then(user=>message.reply(
-        `<@${user.rows[0].userid}>:${user.rows[0].points}`
-        ))
-        .catch(console.log);
+      getPointsByUserId(userId).catch(console.log);
     }
     else message.reply("Invalid userid entered!")
   }
@@ -164,14 +160,25 @@ async function getTopRank(message,pool){
 
 }
 
-async function getPointsByUserId(userId)
+async function getPointsByUserId(userId, message)
 {
-  await pool.connect();
-  var res = await pool.query(
-  `
-    SELECT * FROM members WHERE userid = '${userId}';
-  `);
-  return res;
+
+  pool
+  .connect()
+  .then(client => {
+    return client
+      .query(`SELECT * FROM members WHERE userid = '${userId}';`)
+      .then(res => {
+        client.release()
+        return res
+      })
+      .then(user=>message.reply(`<@${user.rows[0].userid}>:${user.rows[0].points}`))
+      .catch(err => {
+        client.release()
+        console.log(err.stack)
+      })
+  })
+
 }
 
 async function initialise(message, pool)
