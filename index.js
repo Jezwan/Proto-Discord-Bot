@@ -69,18 +69,19 @@ client.on("messageCreate", message => {
   }
   else if(commands[0] === "top" )
   {
-    getTopRank(pool).then(users=>users.rows.map(user=>message.reply(`<@${user.userid}>:${user.points}`)));
+    getTopRank(message, pool);
   }
   else if(commands[0] === "init" )
   {
     initialise(message, pool).catch(console.log);
   }
-  else message.reply("Invalid command!. `proto give <user> <points>`");
+  else message.reply("Invalid command!. `proto points @user`");
 
 });
 
 client.login(token);
 
+//////////////////////////
 function processUserId(userId)
 {
   if (userId === undefined) return undefined;
@@ -104,15 +105,26 @@ function processCommand(command)
 
 async function givePoints(userId, points,message, pool)
 {
-  await pool.connect();
-  message.guild.members.fetch(userId).then(promise=>{
-    pool.query(`
-    INSERT INTO members (userId, points, tag, avatarurl)
-    VALUES(${userId}, ${points}, '${promise.user.username}', '${promise.user.avatarURL()}') 
-    ON CONFLICT (userId) 
-    DO UPDATE SET points = members.points + ${points};`);
-  }).catch(err=>console.log(err))
-  
+  pool
+  .connect()
+  .then(client => {
+    message.guild.members.fetch(userId).then(promise=>{
+    return client
+      .query(`
+      INSERT INTO members (userId, points, tag, avatarurl)
+      VALUES(${userId}, ${points}, '${promise.user.username}', '${promise.user.avatarURL()}') 
+      ON CONFLICT (userId) 
+      DO UPDATE SET points = members.points + ${points};`)
+    })
+      .then(()=> {
+        client.release()
+      })
+      .catch(err => {
+        client.release()
+        console.log(err.stack)
+      })
+  })
+
   
 }
 
@@ -130,15 +142,26 @@ async function getAllRows(pool){
   return res;
 }
 
-async function getTopRank(pool){
-  await pool.connect();
-  const res = await pool.query(`SELECT * FROM members
-  WHERE points = (
-     SELECT MAX (points)
-     FROM members
-  );`);
-  // console.log(res.rows) // Hello world!
-  return res;
+async function getTopRank(message,pool){
+  pool.connect()
+  .then(client => {
+    return client
+      .query(`SELECT * FROM members
+      WHERE points = (
+         SELECT MAX (points)
+         FROM members
+      );`)
+      .then(res => {
+        client.release()
+        return res
+      })
+      .then(users=>users.rows.map(user=>message.reply(`<@${user.userid}>:${user.points}`)))
+      .catch(err => {
+        client.release()
+        console.log(err.stack)
+      })
+  })
+
 }
 
 async function getPointsByUserId(userId)
@@ -165,6 +188,7 @@ async function initialise(message, pool)
       querystring += ` ON CONFLICT (userId) DO NOTHING;`
       console.log(querystring);
       pool.query(querystring);
+      
   })
   
 }
