@@ -64,7 +64,7 @@ client.on("messageCreate", message => {
     initialise(message, pool).catch(console.log);
   }
   else if (commands[0] === "delete") {
-    if (message.member.roles.cache.some(role => role.name === 'LEAD') || message.member.roles.cache.some(role => role.name === 'MAINTAINER')) {
+    if (message.member.roles.cache.some(role => role.name === 'LEAD') || message.member.roles.cache.some(role => role.name === 'ADMIN')) {
       if (commands[1] === undefined){
         message.reply("Invalid username!")
         return
