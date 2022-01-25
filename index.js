@@ -49,10 +49,10 @@ client.on("messageCreate", message => {
     else message.reply("Invalid command!. try `proto points`");
   }
   else if (commands[0] === "points") {
-    if (commands[1] === undefined) userId = message.author.id;
+    if(commands[1] === undefined) userId = message.author.id;
     else userId = processUserId(commands[1]);
 
-    if (isValidGuildMember(message.guild, userId)) {
+    if (isValidGuildMember(message.guild, userId) && userId !== '758186429549117472') { // Sharan's userid
       getPointsByUserId(userId, message, pool).catch(console.log);
     }
     else message.reply("Invalid userid entered!")
