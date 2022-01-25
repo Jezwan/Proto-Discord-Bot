@@ -119,8 +119,8 @@ async function givePoints(userId, points, message, pool) {
       ON CONFLICT (userId) 
       DO UPDATE SET 
       points = members.points + ${points},
-      tag = ${promise.user.username},
-      avatarurl = ${promise.user.avatarURL()};`)
+      tag = '${promise.user.username}',
+      avatarurl = '${promise.user.avatarURL()}';`)
       })
         .then(() => {
           client.release()
