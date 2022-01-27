@@ -248,7 +248,7 @@ function embedUser(userId, message){
         .then(user =>{
         const exampleEmbed = new Discord.MessageEmbed()
       .setColor('#0099ff')
-      .setTitle(`${user.rows[0].tag}  ${user.rows[0].points}`)
+      .setTitle(`${user.rows[0].tag}  ${user.rows[0].points} cube points`)
       if(user.rows[0].avatarurl !== 'null')
         exampleEmbed.setImage(`${user.rows[0].avatarurl}`)
       else
