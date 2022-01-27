@@ -48,15 +48,15 @@ client.on("messageCreate", message => {
     }
     else message.reply("Invalid command!. try `proto points`");
   }
-  else if (commands[0] === "points") {
-    if(commands[1] === undefined) userId = message.author.id;
-    else userId = processUserId(commands[1]);
+  // else if (commands[0] === "points") {
+  //   if(commands[1] === undefined) userId = message.author.id;
+  //   else userId = processUserId(commands[1]);
 
-    if (isValidGuildMember(message.guild, userId) && userId !== '758186429549117472') { // Sharan's userid
-      getPointsByUserId(userId, message, pool).catch(console.log);
-    }
-    else message.reply("Invalid userid entered!")
-  }
+  //   if (isValidGuildMember(message.guild, userId) && userId !== '758186429549117472') { // Sharan's userid
+  //     getPointsByUserId(userId, message, pool).catch(console.log);
+  //   }
+  //   else message.reply("Invalid userid entered!")
+  // }
   else if (commands[0] === "top") {
     getTopRank(message, pool);
   }
@@ -80,6 +80,15 @@ client.on("messageCreate", message => {
       message.reply("Command reserved for Leadership roles");
       return;
     }
+  }
+  else if (commands[0] === "points") {
+    if(commands[1] === undefined) userId = message.author.id;
+    else userId = processUserId(commands[1]);
+
+    if (isValidGuildMember(message.guild, userId) && userId !== '758186429549117472') { // Sharan's userid
+      embedUser(userId, message);
+    }
+    else message.reply("Invalid userid entered!")
   }
   else message.reply("Invalid command!. `proto points @user`");
 
@@ -223,4 +232,33 @@ async function deleteMember(userId){
           console.log(err.stack)
         })
     })
+}
+
+function embedUser(userId, message){
+  
+  pool
+    .connect()
+    .then(client => {
+      return client
+        .query(`SELECT * FROM members WHERE userid = '${userId}';`)
+        .then(res => {
+          client.release()
+          return res
+        })
+        .then(user =>{
+        const exampleEmbed = new Discord.MessageEmbed()
+      .setColor('#0099ff')
+      .setTitle(`${user.rows[0].tag}  ${user.rows[0].points}`)
+      if(user.rows[0].avatarurl !== 'null')
+        exampleEmbed.setImage(`${user.rows[0].avatarurl}`)
+      else
+        exampleEmbed.setImage(`https://cube-dashboard-backend.herokuapp.com/null`)
+      message.reply({ embeds: [exampleEmbed] });
+       })
+        .catch(err => {
+          console.log(err.stack)
+        })
+    })
+
+  
 }
